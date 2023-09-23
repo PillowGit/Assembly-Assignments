@@ -6,9 +6,9 @@ section .data
 
 section .text
     extern printf
-    global array_output
+    global output_array
 
-array_output:
+output_array:
 
     ; Backup registers once again
     push rbp
@@ -40,11 +40,12 @@ loop3:
     je done
 
     ; Print a single float from the array
-    push rbp 
+    push qword 0
+    mov rax, 1
     movq xmm0, [r14 + r13 * 8]
     mov rdi, float_format
     call printf
-    pop rbp
+    pop rax
 
     ; Increment the loop and restart
     inc r13

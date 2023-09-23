@@ -1,128 +1,113 @@
 
-; Created by Esteban Escartin
+; File written by Esteban Escartin
 
-section .data
-    msg1 db "We will take care of all your array needs.", 10, 0
-    msg2 db "Please input float numbers separated", 0
-    msg3 db " by whitespace.", 10, 0
-    msg4 db "After the last number, press whitespace ", 0
-    msg5 db "followed by Ctrl-D", 10, 0
-    msg6 db "Thank you. The numbers in the array are:", 10, 0
-    msg7 db "The sum of numbers in the array is: %f", 10, 0
-    msg8 db "Thank you for using Array Management System.", 10, 0
+extern printf
+extern input_array
+extern output_array
+extern sum_array
+extern exit
 
-    int_format db "%d", 10, 0
-    float_format db "%f"
-    array_size equ 8
+max_array_size equ 8
 
-section .bss
-    align 16
-    array resq array_size  ; Reserve space for an array of 8 floats
-
-section .text
 global manage
 
-extern array_input
-extern array_sum
-extern array_output
-extern printf
+segment .data
+    msg1 db "We will take care of all your array needs", 10, 0
+    msg2 db "Please input float numbers separated", 10, 0
+    msg3 db "Thank you. The numbers in the array are:", 10, 0
+    msg4 db "The sum of numbers in the array is %8.10lf", 10, 0
+    msg5 db "Thank you for using Array Management System.", 10, 0
+segment .bss
+    align 16
+    array resq max_array_size
+
+segment .text
 
 manage:
 
-    ; Backing up registers
-    push rbp                                         
-    mov  rbp,rsp                                     
-    push rdi                                          
-    push rsi                                         
-    push rdx                                          
-    push rcx                                        
-    push r8                                         
-    push r9                                         
-    push r10                                         
-    push r11                                         
-    push r12                                         
-    push r13                                        
-    push r14                                        
-    push r15                                       
-    push rbx                                        
+    ; Back up the general purpose registers
+    push rbp                                          ;Backup rbp
+    mov  rbp,rsp                                      ;The base pointer now points to top of stack
+    push rdi                                          ;Backup rdi
+    push rsi                                          ;Backup rsi
+    push rdx                                          ;Backup rdx
+    push rcx                                          ;Backup rcx
+    push r8                                           ;Backup r8
+    push r9                                           ;Backup r9
+    push r10                                          ;Backup r10
+    push r11                                          ;Backup r11
+    push r12                                          ;Backup r12
+    push r13                                          ;Backup r13
+    push r14                                          ;Backup r14
+    push r15                                          ;Backup r15
+    push rbx                                          ;Backup rbx
     pushf
     push qword 0
 
-    ; Output the introductory strings
-    push rbp
+    ; Display the intro message to the user
+    push qword 0
+    mov rax, 0
     mov rdi, msg1
     call printf
-    pop rbp
+    pop rax
 
-    push rbp
+    ; Prompt the user for floats
+    push qword 0
+    mov rax, 0
     mov rdi, msg2
     call printf
-    pop rbp
-
-    push rbp
-    mov rdi, msg3
-    call printf
-    pop rbp
-
-    push rbp
-    mov rdi, msg4
-    call printf
-    pop rbp
-
-    push rbp
-    mov rdi, msg5
-    call printf
-    pop rbp
-
-    ; Call on the input_array function to get the users input
-    ; We still store the final array_size in r13 after input
-    push qword 0
-    mov rax, 0
-    mov rdi, array ; Push the address of the array into rdi
-    mov rsi, 8 ; Push our array's size (8) into rsi for use in the function
-    call array_input
-    mov r13, rax ; Retrieve the # of floats the user gave us
     pop rax
 
-    ; Print the next prompt before calling print array
-    push rbp
-    mov rdi, msg6
-    call printf
-    pop rbp
-
-    ; Call print array, pass in the array and array length
+    ; Call on input_array to parse the users input 
     push qword 0
-    mov rax, 0
-    mov rdi, array ; Pointer to our array again :*
-    mov rsi, r13 ; This is the number of array elements to print
-    call array_output
-    pop rax
-
-    ; Call sum array, pass in parameters again
-    push qword 0 
     mov rax, 0
     mov rdi, array
-    mov rsi, r13
-    call array_sum
-    movsd xmm15, xmm0 ; xmm0 held our final sum, we are moving it to xmm15
+    mov rsi, max_array_size
+    call input_array
+    mov r13, rax ; r13 contains the actual size of the array, which is important later
     pop rax
 
-    ; Store the result of array_sum and print it
-    push rbp
-    movsd xmm0, xmm15 
-    mov rdi, msg7
+    ; Tell the user we are printing their array
+    push qword 0
+    mov rax, 0
+    mov rdi, msg3
     call printf
-    pop rbp
-
-    ; Print the final message
-    push rbp
-    mov rdi, msg8
-    call printf
-    pop rbp
-
-    ; Restoring registers, return the sum if doing without challenge, or return array pointer otherwise
     pop rax
-    mov rax, [array_sum]
+
+    ; Call on output_array helper function to print the entire array
+    push qword 0
+    mov rax, 0
+    mov rdi, array  
+    mov rsi, r13 ; Again it is important to note r13 is the actual size of our array
+    call output_array
+    pop rax
+
+    ; Call on the function sum_array to sum the entire array and return the result
+    push qword 0
+    mov rax, 0
+    mov rdi, array 
+    mov rsi, r13 ; Once again size is important
+    call sum_array
+    movsd xmm15, xmm0
+    pop rax
+
+    ; Print out the sum of the array
+    push qword 0
+    mov rax, 1
+    mov rdi, msg4
+    call printf
+
+    ; Print out the final message
+    mov rax, 0
+    mov rdi, msg5
+    call printf
+    pop rax
+
+    ; Return the sum of the array to the main file
+    pop rax
+    movsd xmm0, xmm15
+
+    ; Restore our registers
     popf                                    ;Restore rflags
     pop rbx                                 ;Restore rbx
     pop r15                                 ;Restore r15
