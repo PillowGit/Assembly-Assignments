@@ -1,5 +1,6 @@
 
 ; File written by Esteban Escartin
+; CWID: 886178409
 
 extern printf
 extern input_array
@@ -94,18 +95,22 @@ manage:
     ; Print out the sum of the array
     push qword 0
     mov rax, 1
+    movsd xmm0, xmm15
     mov rdi, msg4
     call printf
+    pop rax
 
     ; Print out the final message
+    push qword 0
     mov rax, 0
     mov rdi, msg5
     call printf
     pop rax
 
     ; Return the sum of the array to the main file
-    pop rax
     movsd xmm0, xmm15
+    pop rax
+    
 
     ; Restore our registers
     popf                                    ;Restore rflags

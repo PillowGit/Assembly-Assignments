@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Bash Script written by Esteban Escartin
+# CWID: 886178409
 
 # Compile the assembly files
 nasm -f elf64 input_array.asm -o input_array.o
