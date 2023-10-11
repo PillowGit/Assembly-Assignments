@@ -41,14 +41,41 @@
 ;  Max page width: 132 columns
 ;  Assemble: nasm -f elf64 director.asm -o director.o 
 
+
+
+; Include our external functions
+extern printf
+extern inputarray
+extern outputarray
+extern sortpointers 
+
+; Declare the function defined in this file
 global director
 
-segment .data ; Where you declare constant variables that will be used throughout your code
+; Save enough space for 8 pointers in an array
+array_len equ 8
 
-segment .bss ; Where you initialize memory that can be changed and used throughout your code 
+segment .data ; Where you declare constant variables that will be used throughout your code
+    ; Declare all of the strings we will use for print statements
+    intro_msg db "This program will sort all of your doubles", 10, 0
+    input_prompt db "Please enter floating point numbers separated by white space. After the last numeric input enter at leas t one more white space and press ctrl + d", 10, 0
+    after_input db "Thank you. You entered these numbers:", 10, 0
+    after_output db "End of output of array", 10, 0
+    sort_prompt db "The array is now being sorted without moving any numbers", 10, 0
+    show_sort db "The data in the array is now ordered as follows:", 10, 0
+    after_sort db "End of output of array", 10, 0
+    final_msg db "The array will be sent back to the caller function", 10, 0
+
+    ; formats to be used when printing
+    string_form db "%s", 0
+    float_form db "%lf", 0
+
+segment .bss ; Where you initialize memory that can be changed and used throughout your code
     ; These will be used for xsave
     align 64
     save resb 832
+    ; This will be our array of pointers
+    array resq array_len
 
 segment .text ; Where you actually write x86 code
 
@@ -77,12 +104,41 @@ director:
     xsave [save]
 
 
-    ;==================================== code here
+    ; Print all of the introductory prompts
+    mov qword rax, 0
+    mov rdi, string_form
+    mov rsi, intro_msg
+    call printf
 
+    mov qword rax, 0
+    mov rdi, input_prompt
+    mov rsi, intro_msg
+    call printf
 
+    ; Now take in the user input
+    mov rax, 0
+    mov rdi, array ; Putting the pointer to the array in rdi
+    mov rsi, array_len ; Max length of array_len will be in rsi
+    call inputarray
+    mov r13, rax ; Actual array length will be stored in r13
 
+    ; Conclude the dialogue on user inputs
+    mov qword rax, 0
+    mov rdi, string_form
+    mov rsi, after_input 
+    call printf
 
+    ; Call on an external function to print out the array for us
+    mov rax, 0
+    mov rdi, array ; The array pointer will again be in rdi
+    mov rsi, r13 ; This time, rsi will hold the number of elements in the array to print
+    call outputarray
 
+    ; Print the end of output message
+    mov qword rax, 0
+    mov rdi, string_form
+    mov rsi, after_output
+    call printf
 
     ;==================================== code here
 

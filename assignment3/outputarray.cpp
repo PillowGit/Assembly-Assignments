@@ -40,3 +40,15 @@
 //  Language: C++
 //  Max page width: 132 columns
 //  Assemble: g++ -c -m64 -Wall -o outputarray.o outputarray.cpp -fno-pie -no-pie -std=c++17
+
+#include <stdio.h>
+
+extern "C" void outputarray(double* [], unsigned long);
+
+void outputarray(double *arr[], unsigned long arr_size)
+{
+    for (unsigned long idx = 0; idx < arr_size; ++idx)
+    {
+        printf("%1.10lf\n", *(arr[idx]));
+    }
+}

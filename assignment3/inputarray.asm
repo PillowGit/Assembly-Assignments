@@ -41,10 +41,13 @@
 ;  Max page width: 132 columns
 ;  Assemble: nasm -f elf64 inputarray.asm -o inputarray.o
 
-
+extern malloc
+extern scanf
 global inputarray
 
 segment .data ; Where you declare constant variables that will be used throughout your code
+    ; The float format we will be looking for
+    float_form db "%lf", 0
 
 segment .bss ; Where you initialize memory that can be changed and used throughout your code 
     ; These will be used for xsave
@@ -78,20 +81,49 @@ inputarray:
     xsave [save]
 
 
-    ;==================================== code here
+    ; Initialize our registers to the necessary data
+    mov r14, rdi ; The pointer to our array
+    mov r15, rsi ; The max size of our array
+    xor r13, r13 ; This will be the counter for our input_loop, so we make it 0
+    jmp input_loop
 
+input_loop:
+    ; If we have analyzed the max size already
+    cmp r13, r15
+    jge done
 
+    ; Use malloc to create a pointer for a float and store the mem location in r12
+    mov rax, 0
+    mov rdi, 8
+    call malloc
+    mov r12, rax
 
+    ; Take a users float input, throws it into the pointer
+    mov rax, 0
+    mov rdi, float_form
+    mov rsi, r12
+    call scanf 
 
+    ; Check if the user pressed ctrl+d
+    cdqe
+    cmp rax, -1
+    je done
 
+    ; Place our pointer into the array
+    mov [r14 + r13 * 8], r12
+    inc r13
+    jmp input_loop
 
-    ;==================================== code here
+done:
 
 
     ; Restore the backed up component
     mov rax, 7
     mov rdx, 0
     xrstor [save]
+
+    ; Put the number of floats we analyzed to be returned
+    mov rax, r13
 
     ; Restore the general purpose registers
     popf
