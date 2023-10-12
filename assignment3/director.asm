@@ -21,8 +21,8 @@
 ;  Program name: Pointer Sorting
 ;  Programming languages: Two modules in C++ and three modules in X86
 ;  Date program began: Oct-5-23
-;  Date of last update: ??????????
-;  Date comments upgraded: ??????????????
+;  Date of last update: Oct-12-23
+;  Date comments upgraded: Oct-12-23
 ;  Date open source license added: Oct-5-2023
 ;Files in this program: director.asm, input_array.asm, main.cpp, output_array.cpp, sort_pointers.asm
 ;  Status: Finished.
@@ -62,8 +62,8 @@ segment .data ; Where you declare constant variables that will be used throughou
     after_input db "Thank you. You entered these numbers:", 10, 0
     after_output db "End of output of array", 10, 0
     sort_prompt db "The array is now being sorted without moving any numbers", 10, 0
-    show_sort db "The data in the array is now ordered as follows:", 10, 0
-    after_sort db "End of output of array", 10, 0
+    show_again db "The data in the array is now ordered as follows:", 10, 0
+    ; do after_output again
     final_msg db "The array will be sent back to the caller function", 10, 0
 
     ; formats to be used when printing
@@ -140,8 +140,41 @@ director:
     mov rsi, after_output
     call printf
 
-    ;==================================== code here
+    ; Tell the user we will start sorting 
+    mov qword rax, 0
+    mov rdi, string_form
+    mov rsi, sort_prompt
+    call printf
 
+    ; Call on sort pointers to do its thing
+    mov rax, 0
+    mov rdi, array
+    mov rsi, r13
+    call sortpointers
+
+    ; Show the user that we sorted the array
+    mov qword rax, 0
+    mov rdi, string_form
+    mov rsi, show_again
+    call printf
+
+    ; Print out the array once again
+    mov rax, 0
+    mov rdi, array
+    mov rsi, r13
+    call outputarray
+
+    ; End of printing array
+    mov qword rax, 0
+    mov rdi, string_form
+    mov rsi, after_output
+    call printf
+
+    ; Display the final message
+    mov qword rax, 0
+    mov rdi, string_form
+    mov rsi, final_msg
+    call printf
 
     ; Restore the backed up component
     mov rax, 7
@@ -164,5 +197,8 @@ director:
     pop     rcx
     pop     rbx
     pop     rbp
+
+    ; Set the array to be returned
+    mov rax, array
 
     ret

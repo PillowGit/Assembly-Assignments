@@ -21,8 +21,8 @@
 #  Program name: Pointer Sorting
 #  Programming languages: Two modules in C++ and three modules in X86
 #  Date program began: Oct-5-23
-#  Date of last update: ??????????
-#  Date comments upgraded: ??????????????
+#  Date of last update: Oct-12-23
+#  Date comments upgraded: Oct-12-23
 #  Date open source license added: Oct-5-2023
 #Files in this program: director.asm, input_array.asm, main.cpp, output_array.cpp, sort_pointers.asm
 #  Status: Finished.
