@@ -55,7 +55,8 @@ g++ -c -m64 -Wall -o outputarray.o outputarray.cpp -fno-pie -no-pie -std=c++17
 # Create the executable and run the file
 g++ -m64 -o pointer_sorting.o director.o inputarray.o sortpointers.o main.o outputarray.o -fno-pie -no-pie -std=c++17
 
-./pointer_sorting.o
+
+gdb ./pointer_sorting.o
 
 # Clean up object files after the program runs
 rm *.o
